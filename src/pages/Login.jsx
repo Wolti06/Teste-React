@@ -9,20 +9,82 @@ import {
   Row
 } from "react-bootstrap";
 import "../assets/css/login.css";
+import { toast} from "react-toastify";
+import api from "../_service/api";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [validated, setValidated] = useState(false);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
-  const handleSubmit = (event) => {
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
+let navigate = useNavigate();
 
+  function onchangeEmail(event) {
+    setEmail(event.target.value);
+  }
+  function onchangeSenha(event) {
+    setSenha(event.target.value);
+  }
+
+
+  function mensagemDeErro(mensagem = "Mensagem de erro") {
+    toast.error(mensagem, {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+  }
+
+  function mensagemDeSucesso(mensagem = "") {
+    toast.success(mensagem, {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+  }
+  async function submitForm(event) {
+    event.preventDefault();
     setValidated(true);
-  };
 
+    const data = {
+      email: email,
+      password: senha,
+    };
+
+    const form = new FormData();
+    form.append("email", email);
+    form.append("password", senha);
+    const options = {
+      method: "POST",
+      mode: "no-cors",
+      body: form,
+    };
+
+    fetch(
+      "https://webapp353621.ip-45-79-142-173.cloudezapp.io/api/login",
+      options
+    )
+      .then((response) => response)
+      .then((data) => {
+        mensagemDeSucesso("sucesso");
+        navigate(`/home`);
+      })
+      .catch((error) => {
+        console.log(error);
+        mensagemDeErro("Não foi possivel realizar login");
+      });
+  }
   return (
     <Container>
       <Row style={{ marginTop: "13%" }}>
@@ -39,7 +101,7 @@ function Login() {
             </Col>
             <Col md={6} className="box">
               <h1 className="text-center">E-COMMERCE HARVE</h1>
-              <Form noValidate validated={validated} onSubmit={handleSubmit}>
+              <Form noValidate validated={validated} onSubmit={submitForm}>
                 <Row style={{ margin: "7%" }}>
                   <Col>
                     <Form.Group controlId="validationEmail">
@@ -51,6 +113,7 @@ function Login() {
                           placeholder="E-mail"
                           aria-describedby="inputEmail"
                           required
+                          onChange={onchangeEmail}
                         />
                         <Form.Control.Feedback type="invalid">
                           Adicionar um email valido.
@@ -70,6 +133,7 @@ function Login() {
                           placeholder="Senha"
                           aria-describedby="inputSenha"
                           required
+                          onChange={onchangeSenha}
                         />
                         <Form.Control.Feedback type="invalid">
                           Senha é obrigatorio.
